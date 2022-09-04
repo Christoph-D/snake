@@ -2,6 +2,14 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use std::collections::VecDeque;
 
+const BACKGROUND_COLOR: Color = Color::BLACK;
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+enum GameState {
+    InGame,
+    GameOver,
+}
+
 struct Config {
     grid_size_x: i32,
     grid_size_y: i32,
@@ -37,6 +45,14 @@ struct Name(String);
 struct Position {
     x: i32,
     y: i32,
+}
+
+impl Position {
+    fn apply_offset(&mut self, dir: &Dir) {
+        let (dx, dy) = dir.to_x_y();
+        self.x += dx;
+        self.y += dy;
+    }
 }
 
 #[derive(Clone, PartialEq)]
@@ -81,6 +97,17 @@ fn init(config: Res<Config>, mut commands: Commands) {
     camera.transform.translation.y =
         ((config.grid_size_y - 1) * config.pixels_per_cell) as f32 / 2.0;
     commands.spawn_bundle(camera);
+}
+
+fn reset_game(
+    config: Res<Config>,
+    all_except_camera: Query<Entity, Without<Camera2d>>,
+    mut commands: Commands,
+) {
+    for entity in all_except_camera.iter() {
+        commands.entity(entity).despawn();
+    }
+
     commands
         .spawn()
         .insert(Name("player".to_owned()))
@@ -139,17 +166,68 @@ fn init(config: Res<Config>, mut commands: Commands) {
         ));
 }
 
+fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn_bundle(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                position_type: PositionType::Absolute,
+                justify_content: JustifyContent::Center,
+                ..Default::default()
+            },
+            color: Color::NONE.into(),
+            ..Default::default()
+        })
+        .with_children(|parent| {
+            parent
+                .spawn_bundle(NodeBundle {
+                    style: Style {
+                        size: Size::new(Val::Auto, Val::Auto),
+                        align_self: AlignSelf::Center,
+                        padding: UiRect::all(Val::Px(30.0)),
+                        ..Default::default()
+                    },
+                    color: BACKGROUND_COLOR.into(),
+                    ..Default::default()
+                })
+                .with_children(|parent| {
+                    parent.spawn_bundle(
+                        TextBundle::from_sections(vec![
+                            TextSection {
+                                value: "Game over!".to_owned(),
+                                style: TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 100.0,
+                                    color: Color::RED,
+                                },
+                            },
+                            TextSection {
+                                value: "\nPress any key to restart".to_owned(),
+                                style: TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 40.0,
+                                    color: Color::RED,
+                                },
+                            },
+                        ])
+                        .with_text_alignment(TextAlignment::TOP_CENTER)
+                        .with_style(Style {
+                            align_self: AlignSelf::Center,
+                            ..default()
+                        }),
+                    );
+                });
+        });
+}
+
 fn fit_to_window(
     config: Res<Config>,
     windows: Res<Windows>,
     mut query: Query<&mut Transform, With<Camera2d>>,
 ) {
-    let window = match windows.get_primary() {
-        None => return,
-        Some(w) => w,
-    };
     let pixels_x = (config.grid_size_x * config.pixels_per_cell) as f32 + 50.0;
     let pixels_y = (config.grid_size_y * config.pixels_per_cell) as f32 + 50.0;
+    let window = windows.primary();
     let min_size = window.width().min(window.height());
     let mut transform = query.single_mut();
     transform.scale.x = pixels_x / min_size;
@@ -180,14 +258,14 @@ fn apply_player_input(
     if !timer.0.tick(time.delta()).just_finished() {
         return;
     }
-    let mut v = query.single_mut();
+    let mut velocity = query.single_mut();
     loop {
         let input = match input_queue.pop_last_input() {
             None => return,
             Some(d) => d,
         };
-        if input != v.dir && input != v.dir.opposite() {
-            v.dir = input;
+        if input != velocity.dir && input != velocity.dir.opposite() {
+            velocity.dir = input;
             return;
         }
     }
@@ -198,16 +276,19 @@ fn move_all(timer: ResMut<TickTimer>, mut query: Query<(&mut Position, &Velocity
         return;
     }
     for (mut pos, velocity) in query.iter_mut() {
-        let (dx, dy) = velocity.dir.to_x_y();
-        pos.x += dx;
-        pos.y += dy;
+        pos.apply_offset(&velocity.dir);
     }
 }
 
-fn check_player_collision(config: Res<Config>, query: Query<&Position, With<Player>>) {
-    let pos = query.single();
-    if pos.x < 0 || pos.x > config.grid_size_x || pos.y < 0 || pos.y > config.grid_size_y {
-        println!("Collision!");
+fn check_player_collision(
+    mut game_state: ResMut<State<GameState>>,
+    config: Res<Config>,
+    mut query: Query<(&mut Position, &Velocity), With<Player>>,
+) {
+    let (mut pos, velocity) = query.single_mut();
+    if pos.x < 0 || pos.x >= config.grid_size_x || pos.y < 0 || pos.y >= config.grid_size_y {
+        pos.apply_offset(&velocity.dir.opposite());
+        game_state.set(GameState::GameOver).unwrap();
     }
 }
 
@@ -221,18 +302,20 @@ fn update_transformations(config: Res<Config>, mut query: Query<(&mut Transform,
     }
 }
 
-fn print(query: Query<(&Name, &Position), Changed<Position>>) {
-    for (name, pos) in query.iter() {
-        println!("{}: {}:{}", name.0, pos.x, pos.y)
+fn read_restart_input(keys: Res<Input<KeyCode>>, mut game_state: ResMut<State<GameState>>) {
+    if keys.get_just_pressed().next().is_some() {
+        game_state.set(GameState::InGame).unwrap();
     }
 }
 
 fn main() {
     App::new()
+        .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_plugins_with(DefaultPlugins, |plugins| {
             plugins.disable::<bevy::audio::AudioPlugin>()
         })
         .add_plugin(ShapePlugin)
+        .add_state(GameState::InGame)
         .insert_resource(Config {
             grid_size_x: 25,
             grid_size_y: 25,
@@ -243,11 +326,16 @@ fn main() {
         .add_startup_system(init)
         .add_system(bevy::window::close_on_esc)
         .add_system(fit_to_window)
-        .add_system(read_player_input.before(apply_player_input))
-        .add_system(apply_player_input.before(move_all))
-        .add_system(move_all.before(check_player_collision))
-        .add_system(check_player_collision.before(update_transformations))
-        .add_system(update_transformations)
-        .add_system(print)
+        .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(reset_game))
+        .add_system_set(
+            SystemSet::on_update(GameState::InGame)
+                .with_system(read_player_input.before(apply_player_input))
+                .with_system(apply_player_input.before(move_all))
+                .with_system(move_all.before(check_player_collision))
+                .with_system(check_player_collision.before(update_transformations))
+                .with_system(update_transformations),
+        )
+        .add_system_set(SystemSet::on_enter(GameState::GameOver).with_system(show_game_over_screen))
+        .add_system_set(SystemSet::on_update(GameState::GameOver).with_system(read_restart_input))
         .run();
 }
