@@ -5,14 +5,19 @@ pub struct GameOverScreenPlugin;
 
 impl Plugin for GameOverScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_enter(GameState::GameOver).with_system(show_game_over_screen),
-        )
-        .add_system_set(SystemSet::on_update(GameState::GameOver).with_system(read_restart_input));
+        app
+            .add_system_set(
+                SystemSet::on_enter(GameState::GameOver).with_system(show_game_over_screen))
+            .add_system_set(
+                SystemSet::on_update(GameState::GameOver).with_system(read_restart_input),
+            );
     }
 }
 
+struct GameOverWaitTimer(Timer);
+
 fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(GameOverWaitTimer(Timer::from_seconds(0.2, false)));
     commands
         .spawn_bundle(NodeBundle {
             style: Style {
@@ -66,7 +71,15 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
         });
 }
 
-fn read_restart_input(keys: Res<Input<KeyCode>>, mut game_state: ResMut<State<GameState>>) {
+fn read_restart_input(
+    time: Res<Time>,
+    mut timer: ResMut<GameOverWaitTimer>,
+    keys: Res<Input<KeyCode>>,
+    mut game_state: ResMut<State<GameState>>,
+) {
+    if !timer.0.tick(time.delta()).finished() {
+        return;
+    }
     if keys.get_just_pressed().next().is_some() {
         game_state.set(GameState::InGame).unwrap();
     }

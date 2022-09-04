@@ -17,10 +17,15 @@ pub enum GameState {
 #[derive(Component)]
 pub struct Name(pub String);
 
-#[derive(Component)]
+#[derive(Clone, Component, Eq, Hash, PartialEq)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
+}
+
+#[derive(Clone, Component, Eq, PartialEq)]
+pub struct ZLayer {
+    pub z: i32,
 }
 
 impl Position {
