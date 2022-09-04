@@ -37,6 +37,8 @@ fn reset_game(
         commands.entity(entity).despawn();
     }
 
+    commands.insert_resource(InputQueue::default());
+    commands.insert_resource(TickTimer(Timer::from_seconds(0.2, true)));
     commands.insert_resource(Tail::default());
     commands
         .spawn_bundle(GeometryBuilder::build_as(
@@ -179,10 +181,14 @@ fn update_transformations(
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(BACKGROUND_COLOR))
-        .add_plugins_with(DefaultPlugins, |plugins| {
-            plugins.disable::<bevy::audio::AudioPlugin>()
+        .insert_resource(WindowDescriptor {
+            title: "Snake".to_owned(),
+            canvas: Some("#game".to_owned()),
+            fit_canvas_to_parent: true,
+            ..Default::default()
         })
+        .insert_resource(ClearColor(BACKGROUND_COLOR))
+        .add_plugins(DefaultPlugins)
         .add_plugin(ShapePlugin)
         .add_plugin(camera::CameraPlugin)
         .add_plugin(game_over::GameOverScreenPlugin)
@@ -193,8 +199,6 @@ fn main() {
             grid_size_y: 20,
             pixels_per_cell: 30,
         })
-        .insert_resource(InputQueue::default())
-        .insert_resource(TickTimer(Timer::from_seconds(0.2, true)))
         .add_system(bevy::window::close_on_esc)
         .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(reset_game))
         .add_system_set(
