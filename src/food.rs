@@ -68,6 +68,6 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
                 ..shapes::RegularPolygon::default()
             },
             DrawMode::Fill(FillMode::color(Color::SALMON)),
-            Transform::from_xyz(1e16, 0.0, 0.0),
+            Transform::default(),
         ));
 }

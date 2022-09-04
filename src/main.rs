@@ -76,7 +76,7 @@ fn spawn_segment(config: &Config, pos: Position, tail: &mut Tail, commands: &mut
                 ..shapes::RegularPolygon::default()
             },
             DrawMode::Fill(FillMode::color(Color::LIME_GREEN)),
-            transformation_from_pos(config, &pos, &z_layer),
+            Transform::default(),
         ))
         .insert(TailSegment)
         .insert(pos)
@@ -162,20 +162,16 @@ fn check_player_collision(
     }
 }
 
-fn transformation_from_pos(config: &Config, pos: &Position, z_layer: &ZLayer) -> Transform {
-    Transform::from_xyz(
-        (config.pixels_per_cell * pos.x) as f32,
-        (config.pixels_per_cell * pos.y) as f32,
-        z_layer.z as f32,
-    )
-}
-
 fn update_transformations(
     config: Res<Config>,
     mut query: Query<(&mut Transform, &Position, &ZLayer)>,
 ) {
     for (mut transform, pos, z_layer) in query.iter_mut() {
-        *transform = transformation_from_pos(&config, pos, z_layer);
+        *transform = Transform::from_xyz(
+            (config.pixels_per_cell * pos.x) as f32,
+            (config.pixels_per_cell * pos.y) as f32,
+            z_layer.z as f32,
+        )
     }
 }
 
@@ -211,8 +207,9 @@ fn main() {
                         .before(check_player_food_collision),
                 )
                 .with_system(check_player_food_collision)
-                .with_system(check_player_collision.before(update_transformations))
-                .with_system(update_transformations),
+                .with_system(check_player_collision)
         )
+        .add_stage_after(CoreStage::Update, "update_transformations", SystemStage::parallel())
+        .add_system_to_stage("update_transformations", update_transformations)
         .run();
 }
