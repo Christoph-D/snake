@@ -1,21 +1,28 @@
-use crate::config::{Config, Name};
+use crate::config::{Config, GameState};
 use bevy::ecs::bundle::Bundle;
 use bevy::prelude::*;
 use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*};
 
-#[derive(Component)]
-pub struct Grid;
+pub struct GridPlugin;
+
+impl Plugin for GridPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(init));
+    }
+}
+
+fn init(config: Res<Config>, mut commands: Commands) {
+    commands.spawn_bundle(GridBundle::from_config(&config));
+}
 
 #[derive(Bundle)]
-pub struct GridBundle {
-    pub grid: Grid,
-    pub name: Name,
+struct GridBundle {
     #[bundle]
-    pub shape_bundle: ShapeBundle,
+    shape_bundle: ShapeBundle,
 }
 
 impl GridBundle {
-    pub fn from_config(config: &Config) -> GridBundle {
+    fn from_config(config: &Config) -> GridBundle {
         let mut grid_builder = GeometryBuilder::new();
         let xmax = (config.grid_size_x * config.pixels_per_cell) as f32;
         let ymax = (config.grid_size_y * config.pixels_per_cell) as f32;
@@ -47,8 +54,6 @@ impl GridBundle {
             ));
         }
         GridBundle {
-            grid: Grid,
-            name: Name("grid".to_owned()),
             shape_bundle: grid_builder.build(
                 DrawMode::Stroke(StrokeMode::new(Color::WHITE, 1.0)),
                 Transform::default(),

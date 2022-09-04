@@ -43,7 +43,7 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
     let mut candidates = Vec::<Position>::new();
     for x in 0..config.grid_size_x {
         for y in 0..config.grid_size_y {
-            let pos = Position { x: x, y: y };
+            let pos = Position { x, y };
             if !blocked.contains(&pos) {
                 candidates.push(pos);
             }

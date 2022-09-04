@@ -14,9 +14,6 @@ pub enum GameState {
     GameOver,
 }
 
-#[derive(Component)]
-pub struct Name(pub String);
-
 #[derive(Clone, Component, Eq, Hash, PartialEq)]
 pub struct Position {
     pub x: i32,
