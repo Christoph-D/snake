@@ -187,12 +187,14 @@ fn check_player_food_collision(
     mut player: Query<(&Position, &mut SegmentsToGrow), With<Player>>,
     food_query: Query<(Entity, &Position), (Without<Player>, With<crate::food::Food>)>,
     mut commands: Commands,
+    mut score: EventWriter<crate::score::ScoreUpdate>,
 ) {
     let (player_pos, mut to_grow) = player.single_mut();
     for (food, food_pos) in food_query.iter() {
         if player_pos == food_pos {
             to_grow.0 += 2;
             commands.entity(food).despawn();
+            score.send(crate::score::ScoreUpdate::AteFood);
         }
     }
 }

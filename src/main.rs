@@ -7,6 +7,7 @@ mod config;
 mod food;
 mod game_over;
 mod grid;
+mod score;
 mod player;
 
 fn despawn_all(all_except_camera: Query<Entity, Without<Camera2d>>, mut commands: Commands) {
@@ -42,6 +43,7 @@ fn main() {
         .add_plugin(camera::CameraPlugin)
         .add_plugin(game_over::GameOverScreenPlugin)
         .add_plugin(grid::GridPlugin)
+        .add_plugin(score::ScorePlugin)
         .add_plugin(player::PlayerPlugin)
         .add_plugin(food::FoodPlugin)
         .add_state(GameState::InGame)
