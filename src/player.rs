@@ -185,7 +185,7 @@ fn move_player(
 
 fn check_player_food_collision(
     mut player: Query<(&Position, &mut SegmentsToGrow), With<Player>>,
-    food_query: Query<(Entity, &Position), (Without<Player>, With<crate::food::Food>)>,
+    food_query: Query<(Entity, &Position), With<crate::food::Food>>,
     mut commands: Commands,
     mut score: EventWriter<crate::score::ScoreUpdate>,
 ) {
@@ -202,10 +202,10 @@ fn check_player_food_collision(
 fn check_player_collision(
     mut game_state: ResMut<State<GameState>>,
     config: Res<Config>,
-    mut player: Query<&Position, With<Player>>,
-    segment_query: Query<&Position, (Without<Player>, With<TailSegment>)>,
+    player: Query<&Position, With<Player>>,
+    segment_query: Query<&Position, With<TailSegment>>,
 ) {
-    let pos = player.single_mut();
+    let pos = player.single();
     if pos.x < 0
         || pos.x >= config.grid_size_x
         || pos.y < 0

@@ -7,8 +7,8 @@ mod config;
 mod food;
 mod game_over;
 mod grid;
-mod score;
 mod player;
+mod score;
 
 fn despawn_all(all_except_camera: Query<Entity, Without<Camera2d>>, mut commands: Commands) {
     for entity in all_except_camera.iter() {
