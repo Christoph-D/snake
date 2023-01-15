@@ -12,12 +12,11 @@ impl Plugin for GridPlugin {
 }
 
 fn init(config: Res<Config>, mut commands: Commands) {
-    commands.spawn_bundle(GridBundle::from_config(&config));
+    commands.spawn(GridBundle::from_config(&config));
 }
 
 #[derive(Bundle)]
 struct GridBundle {
-    #[bundle]
     shape_bundle: ShapeBundle,
 }
 

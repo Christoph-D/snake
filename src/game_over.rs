@@ -14,35 +14,35 @@ impl Plugin for GameOverScreenPlugin {
     }
 }
 
+#[derive(Resource)]
 struct GameOverWaitTimer(Timer);
 
 fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(GameOverWaitTimer(Timer::from_seconds(0.2, false)));
+    commands.insert_resource(GameOverWaitTimer(Timer::from_seconds(0.2, TimerMode::Once)));
     commands
-        .spawn_bundle(NodeBundle {
+        .spawn(NodeBundle {
             style: Style {
                 size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
                 position_type: PositionType::Absolute,
                 justify_content: JustifyContent::Center,
-                ..Default::default()
+                ..default()
             },
-            color: Color::NONE.into(),
-            ..Default::default()
+            ..default()
         })
         .with_children(|parent| {
             parent
-                .spawn_bundle(NodeBundle {
+                .spawn(NodeBundle {
                     style: Style {
                         size: Size::new(Val::Auto, Val::Auto),
                         align_self: AlignSelf::Center,
                         padding: UiRect::all(Val::Px(30.0)),
-                        ..Default::default()
+                        ..default()
                     },
-                    color: BACKGROUND_COLOR.into(),
-                    ..Default::default()
+                    background_color: BACKGROUND_COLOR.into(),
+                    ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn_bundle(
+                    parent.spawn(
                         TextBundle::from_sections(vec![
                             TextSection {
                                 value: "Game over!".to_owned(),

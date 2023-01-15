@@ -26,9 +26,9 @@ impl Plugin for PlayerPlugin {
 
 fn init(config: Res<Config>, mut commands: Commands) {
     commands.insert_resource(InputQueue::default());
-    commands.insert_resource(TickTimer(Timer::from_seconds(0.2, true)));
+    commands.insert_resource(TickTimer(Timer::from_seconds(0.2, TimerMode::Repeating)));
     commands.insert_resource(Tail::default());
-    commands.spawn_bundle(PlayerBundle::from_config(&config));
+    commands.spawn(PlayerBundle::from_config(&config));
 }
 
 /// Marker to identify the player entity, the head of the snake.
@@ -44,11 +44,12 @@ struct TailSegment;
 struct SegmentsToGrow(u32);
 
 /// A list of all snake segments excluding its head, oldest segment first.
-#[derive(Default)]
+#[derive(Default, Resource)]
 struct Tail {
     segments: VecDeque<Entity>,
 }
 
+#[derive(Resource)]
 struct TickTimer(Timer);
 
 #[derive(Bundle)]
@@ -58,7 +59,6 @@ struct PlayerBundle {
     z_layer: ZLayer,
     velocity: Velocity,
     segments_to_grow: SegmentsToGrow,
-    #[bundle]
     shape_bundle: ShapeBundle,
 }
 
@@ -90,25 +90,27 @@ impl PlayerBundle {
 
 fn spawn_segment(config: &Config, pos: Position, tail: &mut Tail, commands: &mut Commands) {
     let segment_id = commands
-        .spawn_bundle(GeometryBuilder::build_as(
-            &shapes::RegularPolygon {
-                sides: 4,
-                feature: shapes::RegularPolygonFeature::SideLength(
-                    config.pixels_per_cell as f32 - 3.0,
-                ),
-                ..shapes::RegularPolygon::default()
-            },
-            DrawMode::Fill(FillMode::color(Color::LIME_GREEN)),
-            Transform::default(),
+        .spawn((
+            GeometryBuilder::build_as(
+                &shapes::RegularPolygon {
+                    sides: 4,
+                    feature: shapes::RegularPolygonFeature::SideLength(
+                        config.pixels_per_cell as f32 - 3.0,
+                    ),
+                    ..shapes::RegularPolygon::default()
+                },
+                DrawMode::Fill(FillMode::color(Color::LIME_GREEN)),
+                Transform::default(),
+            ),
+            TailSegment,
+            pos,
+            ZLayer { z: 8 },
         ))
-        .insert(TailSegment)
-        .insert(pos)
-        .insert(ZLayer { z: 8 })
         .id();
     tail.segments.push_back(segment_id);
 }
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 struct InputQueue {
     queue: VecDeque<Dir>,
 }

@@ -31,14 +31,16 @@ fn update_transformations(
 
 fn main() {
     App::new()
-        .insert_resource(WindowDescriptor {
-            title: "Snake".to_owned(),
-            canvas: Some("#game".to_owned()),
-            fit_canvas_to_parent: true,
-            ..Default::default()
-        })
         .insert_resource(ClearColor(BACKGROUND_COLOR))
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                title: "Snake".to_owned(),
+                canvas: Some("#game".to_owned()),
+                fit_canvas_to_parent: true,
+                ..default()
+            },
+            ..default()
+        }))
         .add_plugin(ShapePlugin)
         .add_plugin(camera::CameraPlugin)
         .add_plugin(game_over::GameOverScreenPlugin)

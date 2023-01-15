@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+#[derive(Resource)]
 pub struct Config {
     pub grid_size_x: i32,
     pub grid_size_y: i32,

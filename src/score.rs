@@ -7,6 +7,7 @@ pub enum ScoreUpdate {
     AteFood,
 }
 
+#[derive(Resource)]
 struct ScoreValue(i32);
 
 impl Plugin for ScorePlugin {
@@ -22,29 +23,28 @@ struct Score;
 
 fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(ScoreValue(0));
-    commands
-        .spawn_bundle(
-            TextBundle::from_section(
-                "",  // Updated later
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    font_size: 30.0,
-                    color: Color::WHITE,
-                },
-            )
-            .with_text_alignment(TextAlignment::TOP_LEFT)
-            .with_style(Style {
-                align_self: AlignSelf::FlexEnd,
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    left: Val::Px(50.0),
-                    top: Val::Px(5.0),
-                    ..default()
-                },
-                ..default()
-            }),
+    commands.spawn((
+        TextBundle::from_section(
+            "", // Updated later
+            TextStyle {
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 30.0,
+                color: Color::WHITE,
+            },
         )
-        .insert(Score);
+        .with_text_alignment(TextAlignment::TOP_LEFT)
+        .with_style(Style {
+            align_self: AlignSelf::FlexEnd,
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Px(50.0),
+                top: Val::Px(5.0),
+                ..default()
+            },
+            ..default()
+        }),
+        Score,
+    ));
 }
 
 fn update(

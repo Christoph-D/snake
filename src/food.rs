@@ -16,6 +16,7 @@ impl Plugin for FoodPlugin {
     }
 }
 
+#[derive(Resource)]
 struct FoodSpawnTimer(Timer);
 
 fn check_spawn(
@@ -31,7 +32,10 @@ fn check_spawn(
 }
 
 fn init(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
-    commands.insert_resource(FoodSpawnTimer(Timer::from_seconds(3.0, true)));
+    commands.insert_resource(FoodSpawnTimer(Timer::from_seconds(
+        3.0,
+        TimerMode::Repeating,
+    )));
     spawn(query, config, commands);
 }
 
@@ -54,12 +58,8 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
     }
     let spawn_pos = &candidates[thread_rng().gen_range(0..candidates.len())];
 
-    commands
-        .spawn()
-        .insert(Food)
-        .insert(spawn_pos.clone())
-        .insert(ZLayer { z: 2 })
-        .insert_bundle(GeometryBuilder::build_as(
+    commands.spawn((
+        GeometryBuilder::build_as(
             &shapes::RegularPolygon {
                 sides: 4,
                 feature: shapes::RegularPolygonFeature::SideLength(
@@ -69,5 +69,9 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
             },
             DrawMode::Fill(FillMode::color(Color::SALMON)),
             Transform::default(),
-        ));
+        ),
+        Food,
+        spawn_pos.clone(),
+        ZLayer { z: 2 },
+    ));
 }

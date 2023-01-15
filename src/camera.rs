@@ -15,7 +15,7 @@ fn init(config: Res<Config>, mut commands: Commands) {
         ((config.grid_size_x - 1) * config.pixels_per_cell) as f32 / 2.0;
     camera.transform.translation.y =
         (config.grid_size_y * config.pixels_per_cell) as f32 / 2.0;
-    commands.spawn_bundle(camera);
+    commands.spawn(camera);
 }
 
 fn fit_to_window(
