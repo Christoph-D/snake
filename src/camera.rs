@@ -1,5 +1,5 @@
 use crate::config::Config;
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 
 pub struct CameraPlugin;
 
@@ -20,12 +20,12 @@ fn init(config: Res<Config>, mut commands: Commands) {
 
 fn fit_to_window(
     config: Res<Config>,
-    windows: Res<Windows>,
+    window: Query<&Window, With<PrimaryWindow>>,
     mut query: Query<&mut Transform, With<Camera2d>>,
 ) {
+    let window = window.single();
     let pixels_x = (config.grid_size_x * config.pixels_per_cell) as f32 + 50.0;
     let pixels_y = (config.grid_size_y * config.pixels_per_cell) as f32 + 50.0;
-    let window = windows.primary();
     let min_size = window.width().min(window.height());
     let mut transform = query.single_mut();
     transform.scale.x = pixels_x / min_size;

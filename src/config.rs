@@ -9,8 +9,9 @@ pub struct Config {
 
 pub const BACKGROUND_COLOR: Color = Color::BLACK;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(States, Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub enum GameState {
+    #[default]
     InGame,
     GameOver,
 }

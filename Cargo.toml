@@ -14,15 +14,15 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy_prototype_lyon = "0.7.2"
+bevy_prototype_lyon = "0.8.0"
 rand = "0.8.5"
 
 [dependencies.bevy]
-version = "0.9.1"
+version = "0.10.0"
 default-features = false
-features = ["bevy_text", "bevy_winit", "render"]
+features = ["bevy_text", "bevy_ui", "bevy_render", "bevy_winit"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.bevy]
-version = "0.9.1"
-features = ["bevy_text", "bevy_winit", "dynamic", "render", "x11"]
+version = "0.10.0"
+features = ["bevy_dylib", "bevy_text", "bevy_ui", "bevy_render", "bevy_winit", "x11"]
 default-features = false

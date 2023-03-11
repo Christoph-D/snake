@@ -1,6 +1,5 @@
 use crate::config::*;
 use bevy::prelude::*;
-use bevy_prototype_lyon::entity::ShapeBundle;
 use bevy_prototype_lyon::prelude::*;
 use std::collections::VecDeque;
 
@@ -8,18 +7,18 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(init))
-            .add_system_set(
-                SystemSet::on_update(GameState::InGame)
-                    .with_system(read_player_input.before(apply_player_input))
-                    .with_system(apply_player_input.before(move_player))
-                    .with_system(
-                        move_player
-                            .before(check_player_collision)
-                            .before(check_player_food_collision),
-                    )
-                    .with_system(check_player_food_collision)
-                    .with_system(check_player_collision),
+        app.add_system(init.in_schedule(OnEnter(GameState::InGame)))
+            .add_systems(
+                (
+                    read_player_input.before(apply_player_input),
+                    apply_player_input.before(move_player),
+                    move_player
+                        .before(check_player_collision)
+                        .before(check_player_food_collision),
+                    check_player_food_collision,
+                    check_player_collision,
+                )
+                    .in_set(OnUpdate(GameState::InGame)),
             );
     }
 }
@@ -60,6 +59,8 @@ struct PlayerBundle {
     velocity: Velocity,
     segments_to_grow: SegmentsToGrow,
     shape_bundle: ShapeBundle,
+    fill: Fill,
+    stroke: Stroke,
 }
 
 impl PlayerBundle {
@@ -70,20 +71,18 @@ impl PlayerBundle {
             z_layer: ZLayer { z: 10 },
             velocity: Velocity { dir: Dir::Right },
             segments_to_grow: SegmentsToGrow(3),
-            shape_bundle: GeometryBuilder::build_as(
-                &shapes::RegularPolygon {
+            shape_bundle: ShapeBundle {
+                path: GeometryBuilder::build_as(&shapes::RegularPolygon {
                     sides: 4,
                     feature: shapes::RegularPolygonFeature::SideLength(
                         config.pixels_per_cell as f32 - 3.0,
                     ),
-                    ..shapes::RegularPolygon::default()
-                },
-                DrawMode::Outlined {
-                    fill_mode: FillMode::color(Color::GREEN),
-                    outline_mode: StrokeMode::new(Color::WHITE, 5.0),
-                },
-                Transform::default(),
-            ),
+                    ..default()
+                }),
+                ..default()
+            },
+            fill: Fill::color(Color::GREEN),
+            stroke: Stroke::new(Color::WHITE, 5.0),
         }
     }
 }
@@ -91,17 +90,17 @@ impl PlayerBundle {
 fn spawn_segment(config: &Config, pos: Position, tail: &mut Tail, commands: &mut Commands) {
     let segment_id = commands
         .spawn((
-            GeometryBuilder::build_as(
-                &shapes::RegularPolygon {
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shapes::RegularPolygon {
                     sides: 4,
                     feature: shapes::RegularPolygonFeature::SideLength(
                         config.pixels_per_cell as f32 - 3.0,
                     ),
                     ..shapes::RegularPolygon::default()
-                },
-                DrawMode::Fill(FillMode::color(Color::LIME_GREEN)),
-                Transform::default(),
-            ),
+                }),
+                ..default()
+            },
+            Fill::color(Color::LIME_GREEN),
             TailSegment,
             pos,
             ZLayer { z: 8 },
@@ -202,7 +201,7 @@ fn check_player_food_collision(
 }
 
 fn check_player_collision(
-    mut game_state: ResMut<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
     config: Res<Config>,
     player: Query<&Position, With<Player>>,
     segment_query: Query<&Position, With<TailSegment>>,
@@ -214,6 +213,6 @@ fn check_player_collision(
         || pos.y >= config.grid_size_y
         || segment_query.iter().any(|p| p == pos)
     {
-        game_state.set(GameState::GameOver).unwrap();
+        next_state.set(GameState::GameOver);
     }
 }

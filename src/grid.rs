@@ -1,13 +1,13 @@
 use crate::config::{Config, GameState};
 use bevy::ecs::bundle::Bundle;
 use bevy::prelude::*;
-use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*};
+use bevy_prototype_lyon::prelude::*;
 
 pub struct GridPlugin;
 
 impl Plugin for GridPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(init));
+        app.add_system(init.in_schedule(OnEnter(GameState::InGame)));
     }
 }
 
@@ -18,6 +18,7 @@ fn init(config: Res<Config>, mut commands: Commands) {
 #[derive(Bundle)]
 struct GridBundle {
     shape_bundle: ShapeBundle,
+    stroke: Stroke,
 }
 
 impl GridBundle {
@@ -53,10 +54,11 @@ impl GridBundle {
             ));
         }
         GridBundle {
-            shape_bundle: grid_builder.build(
-                DrawMode::Stroke(StrokeMode::new(Color::WHITE, 1.0)),
-                Transform::default(),
-            ),
+            shape_bundle: ShapeBundle {
+                path: grid_builder.build(),
+                ..default()
+            },
+            stroke: Stroke::new(Color::WHITE, 1.0),
         }
     }
 }

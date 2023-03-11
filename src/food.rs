@@ -11,8 +11,8 @@ pub struct Food;
 
 impl Plugin for FoodPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(init))
-            .add_system_set(SystemSet::on_update(GameState::InGame).with_system(check_spawn));
+        app.add_system(init.in_schedule(OnEnter(GameState::InGame)))
+            .add_system(check_spawn.in_set(OnUpdate(GameState::InGame)));
     }
 }
 
@@ -59,17 +59,17 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
     let spawn_pos = &candidates[thread_rng().gen_range(0..candidates.len())];
 
     commands.spawn((
-        GeometryBuilder::build_as(
-            &shapes::RegularPolygon {
+        ShapeBundle {
+            path: GeometryBuilder::build_as(&shapes::RegularPolygon {
                 sides: 4,
                 feature: shapes::RegularPolygonFeature::SideLength(
                     config.pixels_per_cell as f32 - 3.0,
                 ),
-                ..shapes::RegularPolygon::default()
-            },
-            DrawMode::Fill(FillMode::color(Color::SALMON)),
-            Transform::default(),
-        ),
+                ..default()
+            }),
+            ..default()
+        },
+        Fill::color(Color::SALMON),
         Food,
         spawn_pos.clone(),
         ZLayer { z: 2 },

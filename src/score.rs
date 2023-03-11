@@ -13,8 +13,8 @@ struct ScoreValue(i32);
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ScoreUpdate>()
-            .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(init))
-            .add_system_set(SystemSet::on_update(GameState::InGame).with_system(update));
+            .add_system(init.in_schedule(OnEnter(GameState::InGame)))
+            .add_system(update.in_set(OnUpdate(GameState::InGame)));
     }
 }
 
@@ -32,7 +32,7 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
                 color: Color::WHITE,
             },
         )
-        .with_text_alignment(TextAlignment::TOP_LEFT)
+        .with_text_alignment(TextAlignment::Left)
         .with_style(Style {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
