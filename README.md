@@ -1,5 +1,7 @@
 # Snake
 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Christoph-D/snake/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Christoph-D/snake/tree/main)
+
 A simple Snake clone.
 
 ## Example
