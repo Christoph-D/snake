@@ -10,7 +10,10 @@ mod grid;
 mod player;
 mod score;
 
-fn despawn_all(all_except_necessary: Query<Entity, (Without<Camera2d>, Without<Window>)>, mut commands: Commands) {
+fn despawn_all(
+    all_except_necessary: Query<Entity, (Without<Camera2d>, Without<Window>)>,
+    mut commands: Commands,
+) {
     for entity in all_except_necessary.iter() {
         commands.entity(entity).despawn();
     }
@@ -63,6 +66,10 @@ fn main() {
         .add_system(bevy::window::close_on_esc)
         .add_system(despawn_all.in_schedule(OnEnter(GameState::InGame)))
         .add_system(update_transformations.in_base_set(BaseSet::UpdateTransformations))
-        .configure_set(BaseSet::UpdateTransformations.after(CoreSet::Update).before(CoreSet::PostUpdate))
+        .configure_set(
+            BaseSet::UpdateTransformations
+                .after(CoreSet::Update)
+                .before(CoreSet::PostUpdate),
+        )
         .run();
 }

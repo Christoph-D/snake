@@ -13,8 +13,7 @@ fn init(config: Res<Config>, mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
     camera.transform.translation.x =
         ((config.grid_size_x - 1) * config.pixels_per_cell) as f32 / 2.0;
-    camera.transform.translation.y =
-        (config.grid_size_y * config.pixels_per_cell) as f32 / 2.0;
+    camera.transform.translation.y = (config.grid_size_y * config.pixels_per_cell) as f32 / 2.0;
     commands.spawn(camera);
 }
 
