@@ -5,7 +5,8 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(init).add_system(fit_to_window);
+        app.add_systems(Startup, init)
+            .add_systems(Update, fit_to_window);
     }
 }
 

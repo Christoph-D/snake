@@ -3,6 +3,7 @@ use bevy::prelude::*;
 
 pub struct ScorePlugin;
 
+#[derive(Event)]
 pub enum ScoreUpdate {
     AteFood,
 }
@@ -13,8 +14,8 @@ struct ScoreValue(i32);
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ScoreUpdate>()
-            .add_system(init.in_schedule(OnEnter(GameState::InGame)))
-            .add_system(update.in_set(OnUpdate(GameState::InGame)));
+            .add_systems(OnEnter(GameState::InGame), init)
+            .add_systems(Update, update.run_if(in_state(GameState::InGame)));
     }
 }
 
@@ -36,11 +37,8 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_style(Style {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
-            position: UiRect {
-                left: Val::Px(50.0),
-                top: Val::Px(5.0),
-                ..default()
-            },
+            left: Val::Px(50.0),
+            top: Val::Px(5.0),
             ..default()
         }),
         Score,

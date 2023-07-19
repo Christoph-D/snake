@@ -7,8 +7,9 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(init.in_schedule(OnEnter(GameState::InGame)))
+        app.add_systems(OnEnter(GameState::InGame), init)
             .add_systems(
+                Update,
                 (
                     read_player_input.before(apply_player_input),
                     apply_player_input.before(move_player),
@@ -18,7 +19,7 @@ impl Plugin for PlayerPlugin {
                     check_player_food_collision,
                     check_player_collision,
                 )
-                    .in_set(OnUpdate(GameState::InGame)),
+                    .run_if(in_state(GameState::InGame)),
             );
     }
 }

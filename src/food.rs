@@ -11,8 +11,8 @@ pub struct Food;
 
 impl Plugin for FoodPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(init.in_schedule(OnEnter(GameState::InGame)))
-            .add_system(check_spawn.in_set(OnUpdate(GameState::InGame)));
+        app.add_systems(OnEnter(GameState::InGame), init)
+            .add_systems(Update, check_spawn.run_if(in_state(GameState::InGame)));
     }
 }
 

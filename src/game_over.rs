@@ -5,8 +5,11 @@ pub struct GameOverScreenPlugin;
 
 impl Plugin for GameOverScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(show_game_over_screen.in_schedule(OnEnter(GameState::GameOver)))
-            .add_system(read_restart_input.in_set(OnUpdate(GameState::GameOver)));
+        app.add_systems(OnEnter(GameState::GameOver), show_game_over_screen)
+            .add_systems(
+                Update,
+                read_restart_input.run_if(in_state(GameState::GameOver)),
+            );
     }
 }
 
@@ -18,7 +21,8 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
     commands
         .spawn(NodeBundle {
             style: Style {
-                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
                 position_type: PositionType::Absolute,
                 justify_content: JustifyContent::Center,
                 ..default()
@@ -29,7 +33,8 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
             parent
                 .spawn(NodeBundle {
                     style: Style {
-                        size: Size::new(Val::Auto, Val::Auto),
+                        width: Val::Auto,
+                        height: Val::Auto,
                         align_self: AlignSelf::Center,
                         padding: UiRect::all(Val::Px(30.0)),
                         ..default()
