@@ -18,11 +18,11 @@ bevy_prototype_lyon = "0.9.0"
 rand = "0.8.5"
 
 [dependencies.bevy]
-version = "0.11.0"
+version = "0.11.3"
 default-features = false
 features = ["bevy_text", "bevy_ui", "bevy_render", "bevy_winit", "webgl2"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.bevy]
-version = "0.11.0"
+version = "0.11.3"
 features = ["bevy_dylib", "bevy_text", "bevy_ui", "bevy_render", "bevy_winit", "x11"]
 default-features = false
