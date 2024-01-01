@@ -51,7 +51,7 @@ fn update(
     mut event: EventReader<ScoreUpdate>,
 ) {
     let mut text = query.single_mut();
-    for _ in event.iter() {
+    for _ in event.read() {
         score.0 += 1;
     }
     text.sections[0].value = format!("Score: {}", score.0);
