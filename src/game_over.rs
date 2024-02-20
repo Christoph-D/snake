@@ -62,7 +62,7 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
                                 },
                             },
                         ])
-                        .with_text_alignment(TextAlignment::Center)
+                        .with_text_justify(JustifyText::Center)
                         .with_style(Style {
                             align_self: AlignSelf::Center,
                             ..default()
@@ -75,7 +75,7 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
 fn read_restart_input(
     time: Res<Time>,
     mut timer: ResMut<GameOverWaitTimer>,
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if !timer.0.tick(time.delta()).finished() {

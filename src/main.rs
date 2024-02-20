@@ -42,12 +42,11 @@ fn main() {
             primary_window: Some(Window {
                 title: "Snake".to_owned(),
                 canvas: Some("#game".to_owned()),
-                fit_canvas_to_parent: true,
                 ..default()
             }),
             ..default()
         }))
-        .add_state::<GameState>()
+        .init_state::<GameState>()
         .add_plugins((
             ShapePlugin,
             camera::CameraPlugin,

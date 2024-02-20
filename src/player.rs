@@ -124,17 +124,17 @@ impl InputQueue {
     }
 }
 
-fn read_player_input(keys: Res<Input<KeyCode>>, mut input_queue: ResMut<InputQueue>) {
-    if keys.just_pressed(KeyCode::Right) {
+fn read_player_input(keys: Res<ButtonInput<KeyCode>>, mut input_queue: ResMut<InputQueue>) {
+    if keys.just_pressed(KeyCode::ArrowRight) {
         input_queue.insert_input(Dir::Right);
     }
-    if keys.just_pressed(KeyCode::Left) {
+    if keys.just_pressed(KeyCode::ArrowLeft) {
         input_queue.insert_input(Dir::Left);
     }
-    if keys.just_pressed(KeyCode::Up) {
+    if keys.just_pressed(KeyCode::ArrowUp) {
         input_queue.insert_input(Dir::Up);
     }
-    if keys.just_pressed(KeyCode::Down) {
+    if keys.just_pressed(KeyCode::ArrowDown) {
         input_queue.insert_input(Dir::Down);
     }
 }
