@@ -35,6 +35,21 @@ fn update_transformations(
 #[derive(ScheduleLabel, Debug, Hash, PartialEq, Eq, Clone)]
 struct UpdateTransformations;
 
+pub fn close_on_esc(
+    mut commands: Commands,
+    focused_windows: Query<(Entity, &Window)>,
+    input: Res<ButtonInput<KeyCode>>,
+) {
+    for (window, focus) in focused_windows.iter() {
+        if !focus.focused {
+            continue;
+        }
+        if input.just_pressed(KeyCode::Escape) {
+            commands.entity(window).despawn();
+        }
+    }
+}
+
 fn main() {
     let mut app = App::new();
     app.insert_resource(ClearColor(BACKGROUND_COLOR))
@@ -47,6 +62,7 @@ fn main() {
             ..default()
         }))
         .init_state::<GameState>()
+        .enable_state_scoped_entities::<GameState>()
         .add_plugins((
             ShapePlugin,
             camera::CameraPlugin,
@@ -61,12 +77,12 @@ fn main() {
             grid_size_y: 20,
             pixels_per_cell: 30,
         })
-        .add_systems(Update, bevy::window::close_on_esc)
+        .add_systems(Update, close_on_esc)
         .add_systems(OnEnter(GameState::InGame), despawn_all)
         .init_schedule(UpdateTransformations)
         .add_systems(UpdateTransformations, update_transformations);
 
-    let mut order = app.world.resource_mut::<MainScheduleOrder>();
+    let mut order = app.world_mut().resource_mut::<MainScheduleOrder>();
     order.insert_after(Update, UpdateTransformations);
 
     app.run();

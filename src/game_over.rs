@@ -1,4 +1,5 @@
 use crate::config::{GameState, BACKGROUND_COLOR};
+use bevy::color::palettes::css;
 use bevy::prelude::*;
 
 pub struct GameOverScreenPlugin;
@@ -50,7 +51,7 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
                                 style: TextStyle {
                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 100.0,
-                                    color: Color::RED,
+                                    color: Color::from(css::RED),
                                 },
                             },
                             TextSection {
@@ -58,7 +59,7 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
                                 style: TextStyle {
                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 40.0,
-                                    color: Color::RED,
+                                    color: Color::from(css::RED),
                                 },
                             },
                         ])

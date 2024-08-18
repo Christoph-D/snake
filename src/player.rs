@@ -1,4 +1,5 @@
 use crate::config::*;
+use bevy::color::palettes::css;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use std::collections::VecDeque;
@@ -82,7 +83,7 @@ impl PlayerBundle {
                 }),
                 ..default()
             },
-            fill: Fill::color(Color::GREEN),
+            fill: Fill::color(css::GREEN),
             stroke: Stroke::new(Color::WHITE, 5.0),
         }
     }
@@ -101,7 +102,7 @@ fn spawn_segment(config: &Config, pos: Position, tail: &mut Tail, commands: &mut
                 }),
                 ..default()
             },
-            Fill::color(Color::LIME_GREEN),
+            Fill::color(css::LIMEGREEN),
             TailSegment,
             pos,
             ZLayer { z: 8 },

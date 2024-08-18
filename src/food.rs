@@ -1,4 +1,5 @@
 use crate::config::{Config, GameState, Position, ZLayer};
+use bevy::color::palettes::css;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use rand::prelude::*;
@@ -69,7 +70,7 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
             }),
             ..default()
         },
-        Fill::color(Color::SALMON),
+        Fill::color(css::SALMON),
         Food,
         spawn_pos.clone(),
         ZLayer { z: 2 },
