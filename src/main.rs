@@ -78,7 +78,7 @@ fn main() {
             pixels_per_cell: 30,
         })
         .add_systems(Update, close_on_esc)
-        .add_systems(OnEnter(GameState::InGame), despawn_all)
+        .add_systems(OnExit(GameState::GameOver), despawn_all)
         .init_schedule(UpdateTransformations)
         .add_systems(UpdateTransformations, update_transformations);
 

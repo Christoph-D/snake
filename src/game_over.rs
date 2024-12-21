@@ -20,55 +20,49 @@ struct GameOverWaitTimer(Timer);
 fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(GameOverWaitTimer(Timer::from_seconds(0.2, TimerMode::Once)));
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                position_type: PositionType::Absolute,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
+        .spawn((Node {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            position_type: PositionType::Absolute,
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
             ..default()
-        })
+        },))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
-                    style: Style {
-                        width: Val::Auto,
-                        height: Val::Auto,
-                        align_self: AlignSelf::Center,
-                        padding: UiRect::all(Val::Px(30.0)),
+                .spawn((
+                    Node {
+                        padding: UiRect::px(30.0, 30.0, 15.0, 30.0),
                         ..default()
                     },
-                    background_color: BACKGROUND_COLOR.into(),
-                    ..default()
-                })
+                    BackgroundColor(BACKGROUND_COLOR),
+                ))
                 .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle::from_sections(vec![
-                            TextSection {
-                                value: "Game over!".to_owned(),
-                                style: TextStyle {
+                    parent
+                        .spawn((
+                            Text::new(""),
+                            TextLayout::new_with_justify(JustifyText::Center),
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                TextSpan::new("Game over!"),
+                                TextFont {
                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 100.0,
-                                    color: Color::from(css::RED),
+                                    ..default()
                                 },
-                            },
-                            TextSection {
-                                value: "\nPress any key to restart".to_owned(),
-                                style: TextStyle {
+                                TextColor(css::RED.into()),
+                            ));
+                            parent.spawn((
+                                TextSpan::new("\nPress any key to restart"),
+                                TextFont {
                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 40.0,
-                                    color: Color::from(css::RED),
+                                    ..default()
                                 },
-                            },
-                        ])
-                        .with_text_justify(JustifyText::Center)
-                        .with_style(Style {
-                            align_self: AlignSelf::Center,
-                            ..default()
-                        }),
-                    );
+                                TextColor(css::RED.into()),
+                            ));
+                        });
                 });
         });
 }

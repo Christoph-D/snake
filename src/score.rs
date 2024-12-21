@@ -25,22 +25,21 @@ struct Score;
 fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(ScoreValue(0));
     commands.spawn((
-        TextBundle::from_section(
-            "", // Updated later
-            TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                font_size: 30.0,
-                color: Color::WHITE,
-            },
-        )
-        .with_text_justify(JustifyText::Left)
-        .with_style(Style {
+        Text::new(""), // Updated later
+        TextFont {
+            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            font_size: 30.0,
+            ..default()
+        },
+        TextColor(Color::WHITE),
+        TextLayout::new_with_justify(JustifyText::Left),
+        Node {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
             left: Val::Px(50.0),
             top: Val::Px(5.0),
             ..default()
-        }),
+        },
         Score,
     ));
 }
@@ -54,5 +53,5 @@ fn update(
     for _ in event.read() {
         score.0 += 1;
     }
-    text.sections[0].value = format!("Score: {}", score.0);
+    text.0 = format!("Score: {}", score.0);
 }
