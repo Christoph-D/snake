@@ -57,7 +57,7 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
     if candidates.is_empty() {
         panic!("No more space to spawn food!")
     }
-    let spawn_pos = &candidates[thread_rng().gen_range(0..candidates.len())];
+    let spawn_pos = &candidates[rand::rng().random_range(0..candidates.len())];
 
     commands.spawn((
         ShapeBundle {
