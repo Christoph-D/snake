@@ -1,6 +1,5 @@
 use crate::config::*;
 use bevy::{app::MainScheduleOrder, ecs::schedule::ScheduleLabel, prelude::*};
-use bevy_prototype_lyon::prelude::*;
 
 mod camera;
 mod config;
@@ -64,7 +63,6 @@ fn main() {
         .init_state::<GameState>()
         .enable_state_scoped_entities::<GameState>()
         .add_plugins((
-            ShapePlugin,
             camera::CameraPlugin,
             game_over::GameOverScreenPlugin,
             grid::GridPlugin,

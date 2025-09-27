@@ -1,7 +1,8 @@
 use crate::config::*;
+use bevy::asset::RenderAssetUsages;
 use bevy::color::palettes::css;
 use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::*;
+use bevy::render::mesh::{Indices, PrimitiveTopology};
 use std::collections::VecDeque;
 
 pub struct PlayerPlugin;
@@ -25,11 +26,65 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn init(config: Res<Config>, mut commands: Commands) {
+fn create_head_mesh(size: f32) -> Mesh {
+    // Two rectangles on top of each other to create a rectangle with an outline.
+    let s = size / 2.0 + 2.5; // outer size
+    let t = size / 2.0 - 2.5; // inner size
+    let o = LinearRgba::from(css::WHITE).to_f32_array(); // outer color
+    let i = LinearRgba::from(css::GREEN).to_f32_array(); // inner color
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    )
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_POSITION,
+        vec![
+            [-s, -s, 0.0],
+            [s, -s, 0.0],
+            [s, s, 0.0],
+            [-s, s, 0.0],
+            [-t, -t, 1.0],
+            [t, -t, 1.0],
+            [t, t, 1.0],
+            [-t, t, 1.0],
+        ],
+    )
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_COLOR,
+        vec![
+            o, o, o, o, //
+            i, i, i, i, //
+        ],
+    )
+    .with_inserted_indices(Indices::U32(vec![
+        0, 1, 3, //
+        1, 2, 3, //
+        4, 5, 7, //
+        5, 6, 7, //
+    ]))
+}
+
+fn init(
+    config: Res<Config>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
     commands.insert_resource(InputQueue::default());
     commands.insert_resource(TickTimer(Timer::from_seconds(0.2, TimerMode::Repeating)));
     commands.insert_resource(Tail::default());
-    commands.spawn(PlayerBundle::from_config(&config));
+
+    let assets = PlayerAssets {
+        head_mesh: meshes.add(create_head_mesh(config.pixels_per_cell as f32 - 3.0)),
+        head_material: materials.add(ColorMaterial::default()),
+        tail_mesh: meshes.add(Rectangle::new(
+            config.pixels_per_cell as f32 - 3.0,
+            config.pixels_per_cell as f32 - 3.0,
+        )),
+        tail_material: materials.add(Color::from(css::LIMEGREEN)),
+    };
+    commands.insert_resource(assets.clone());
+    commands.spawn(PlayerBundle::new(&assets));
 }
 
 /// Marker to identify the player entity, the head of the snake.
@@ -53,6 +108,14 @@ struct Tail {
 #[derive(Resource)]
 struct TickTimer(Timer);
 
+#[derive(Resource, Clone)]
+struct PlayerAssets {
+    head_mesh: Handle<Mesh>,
+    head_material: Handle<ColorMaterial>,
+    tail_mesh: Handle<Mesh>,
+    tail_material: Handle<ColorMaterial>,
+}
+
 #[derive(Bundle)]
 struct PlayerBundle {
     player: Player,
@@ -60,43 +123,29 @@ struct PlayerBundle {
     z_layer: ZLayer,
     velocity: Velocity,
     segments_to_grow: SegmentsToGrow,
-    shape: Shape,
+    mesh: Mesh2d,
+    material: MeshMaterial2d<ColorMaterial>,
 }
 
 impl PlayerBundle {
-    fn from_config(config: &Config) -> PlayerBundle {
+    fn new(assets: &PlayerAssets) -> PlayerBundle {
         PlayerBundle {
             player: Player,
             pos: Position { x: 5, y: 5 },
             z_layer: ZLayer { z: 10 },
             velocity: Velocity { dir: Dir::Right },
             segments_to_grow: SegmentsToGrow(3),
-            shape: ShapeBuilder::with(&shapes::RegularPolygon {
-                sides: 4,
-                feature: shapes::RegularPolygonFeature::SideLength(
-                    config.pixels_per_cell as f32 - 3.0,
-                ),
-                ..default()
-            })
-            .fill(css::GREEN)
-            .stroke((Color::WHITE, 5.0))
-            .build(),
+            mesh: Mesh2d(assets.head_mesh.clone()),
+            material: MeshMaterial2d(assets.head_material.clone()),
         }
     }
 }
 
-fn spawn_segment(config: &Config, pos: Position, tail: &mut Tail, commands: &mut Commands) {
+fn spawn_segment(pos: Position, tail: &mut Tail, commands: &mut Commands, assets: &PlayerAssets) {
     let segment_id = commands
         .spawn((
-            ShapeBuilder::with(&shapes::RegularPolygon {
-                sides: 4,
-                feature: shapes::RegularPolygonFeature::SideLength(
-                    config.pixels_per_cell as f32 - 3.0,
-                ),
-                ..default()
-            })
-            .fill(css::LIMEGREEN)
-            .build(),
+            Mesh2d(assets.tail_mesh.clone()),
+            MeshMaterial2d(assets.tail_material.clone()),
             TailSegment,
             pos,
             ZLayer { z: 8 },
@@ -159,16 +208,16 @@ fn apply_player_input(
 fn move_player(
     timer: ResMut<TickTimer>,
     mut query: Query<(&mut Position, &Velocity, &mut SegmentsToGrow), With<Player>>,
-    config: Res<Config>,
     mut tail: ResMut<Tail>,
     mut commands: Commands,
+    assets: Res<PlayerAssets>,
 ) {
     if !timer.0.just_finished() {
         return;
     }
     let (mut pos, velocity, mut to_grow) = query.single_mut().unwrap();
     if velocity.dir != Dir::None {
-        spawn_segment(&config, pos.clone(), &mut tail, &mut commands);
+        spawn_segment(pos.clone(), &mut tail, &mut commands, &assets);
         if to_grow.0 == 0 {
             commands
                 .entity(tail.segments.pop_front().unwrap())
