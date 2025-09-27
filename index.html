@@ -1,7 +1,9 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake</title>
     <style>
         body {
             margin: 0;
@@ -21,13 +23,11 @@
 </head>
 
 <body>
+    <canvas id="game" tabindex="0"></canvas>
     <script type="module">
         import init from './snake.js';
         init();
         document.getElementById('game').focus();
     </script>
-
-    <canvas id="game" tabindex=0></canvas>
 </body>
-
 </html>

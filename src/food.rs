@@ -24,16 +24,20 @@ struct FoodAssets {
     material: Handle<ColorMaterial>,
 }
 
+#[derive(Resource)]
+struct FoodRng(rand::rngs::StdRng);
+
 fn check_spawn(
     time: Res<Time>,
     mut timer: ResMut<FoodSpawnTimer>,
     query: Query<&Position>,
     config: Res<Config>,
-    commands: Commands,
+    mut commands: Commands,
     assets: Res<FoodAssets>,
+    rng: ResMut<FoodRng>,
 ) {
     if timer.0.tick(time.delta()).just_finished() {
-        spawn(query, config, commands, &assets);
+        spawn(query, config, &mut commands, &assets, rng.into_inner());
     }
 }
 
@@ -55,15 +59,20 @@ fn init(
         )),
         material: materials.add(Color::from(css::SALMON)),
     };
-    commands.insert_resource(assets.clone());
-    spawn(query, config, commands, &assets);
+
+    let mut rng = FoodRng(StdRng::seed_from_u64(getrandom::u64().unwrap_or(0)));
+    spawn(query, config, &mut commands, &assets, &mut rng);
+
+    commands.insert_resource(assets);
+    commands.insert_resource(rng);
 }
 
 fn spawn(
     query: Query<&Position>,
     config: Res<Config>,
-    mut commands: Commands,
+    commands: &mut Commands,
     assets: &FoodAssets,
+    rng: &mut FoodRng,
 ) {
     let mut blocked = HashSet::<Position>::new();
     for pos in query.iter() {
@@ -81,7 +90,7 @@ fn spawn(
     if candidates.is_empty() {
         panic!("No more space to spawn food!")
     }
-    let spawn_pos = &candidates[rand::rng().random_range(0..candidates.len())];
+    let spawn_pos = &candidates[rng.0.random_range(0..candidates.len())];
     commands.spawn((
         Mesh2d(assets.mesh.clone()),
         MeshMaterial2d(assets.material.clone()),
