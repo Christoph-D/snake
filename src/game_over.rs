@@ -1,4 +1,4 @@
-use crate::config::{GameState, BACKGROUND_COLOR};
+use crate::config::{BACKGROUND_COLOR, GameState};
 use bevy::color::palettes::css;
 use bevy::prelude::*;
 

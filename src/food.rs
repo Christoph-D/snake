@@ -60,17 +60,13 @@ fn spawn(query: Query<&Position>, config: Res<Config>, mut commands: Commands) {
     let spawn_pos = &candidates[rand::rng().random_range(0..candidates.len())];
 
     commands.spawn((
-        ShapeBundle {
-            path: GeometryBuilder::build_as(&shapes::RegularPolygon {
-                sides: 4,
-                feature: shapes::RegularPolygonFeature::SideLength(
-                    config.pixels_per_cell as f32 - 3.0,
-                ),
-                ..default()
-            }),
+        ShapeBuilder::with(&shapes::RegularPolygon {
+            sides: 4,
+            feature: shapes::RegularPolygonFeature::SideLength(config.pixels_per_cell as f32 - 3.0),
             ..default()
-        },
-        Fill::color(css::SALMON),
+        })
+        .fill(css::SALMON)
+        .build(),
         Food,
         spawn_pos.clone(),
         ZLayer { z: 2 },

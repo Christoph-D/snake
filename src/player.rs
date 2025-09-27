@@ -60,9 +60,7 @@ struct PlayerBundle {
     z_layer: ZLayer,
     velocity: Velocity,
     segments_to_grow: SegmentsToGrow,
-    shape_bundle: ShapeBundle,
-    fill: Fill,
-    stroke: Stroke,
+    shape: Shape,
 }
 
 impl PlayerBundle {
@@ -73,18 +71,16 @@ impl PlayerBundle {
             z_layer: ZLayer { z: 10 },
             velocity: Velocity { dir: Dir::Right },
             segments_to_grow: SegmentsToGrow(3),
-            shape_bundle: ShapeBundle {
-                path: GeometryBuilder::build_as(&shapes::RegularPolygon {
-                    sides: 4,
-                    feature: shapes::RegularPolygonFeature::SideLength(
-                        config.pixels_per_cell as f32 - 3.0,
-                    ),
-                    ..default()
-                }),
+            shape: ShapeBuilder::with(&shapes::RegularPolygon {
+                sides: 4,
+                feature: shapes::RegularPolygonFeature::SideLength(
+                    config.pixels_per_cell as f32 - 3.0,
+                ),
                 ..default()
-            },
-            fill: Fill::color(css::GREEN),
-            stroke: Stroke::new(Color::WHITE, 5.0),
+            })
+            .fill(css::GREEN)
+            .stroke((Color::WHITE, 5.0))
+            .build(),
         }
     }
 }
@@ -92,17 +88,15 @@ impl PlayerBundle {
 fn spawn_segment(config: &Config, pos: Position, tail: &mut Tail, commands: &mut Commands) {
     let segment_id = commands
         .spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shapes::RegularPolygon {
-                    sides: 4,
-                    feature: shapes::RegularPolygonFeature::SideLength(
-                        config.pixels_per_cell as f32 - 3.0,
-                    ),
-                    ..shapes::RegularPolygon::default()
-                }),
+            ShapeBuilder::with(&shapes::RegularPolygon {
+                sides: 4,
+                feature: shapes::RegularPolygonFeature::SideLength(
+                    config.pixels_per_cell as f32 - 3.0,
+                ),
                 ..default()
-            },
-            Fill::color(css::LIMEGREEN),
+            })
+            .fill(css::LIMEGREEN)
+            .build(),
             TailSegment,
             pos,
             ZLayer { z: 8 },
@@ -149,7 +143,7 @@ fn apply_player_input(
     if !timer.0.tick(time.delta()).just_finished() {
         return;
     }
-    let mut velocity = query.single_mut();
+    let mut velocity = query.single_mut().unwrap();
     loop {
         let input = match input_queue.pop_last_input() {
             None => return,
@@ -172,7 +166,7 @@ fn move_player(
     if !timer.0.just_finished() {
         return;
     }
-    let (mut pos, velocity, mut to_grow) = query.single_mut();
+    let (mut pos, velocity, mut to_grow) = query.single_mut().unwrap();
     if velocity.dir != Dir::None {
         spawn_segment(&config, pos.clone(), &mut tail, &mut commands);
         if to_grow.0 == 0 {
@@ -192,12 +186,12 @@ fn check_player_food_collision(
     mut commands: Commands,
     mut score: EventWriter<crate::score::ScoreUpdate>,
 ) {
-    let (player_pos, mut to_grow) = player.single_mut();
+    let (player_pos, mut to_grow) = player.single_mut().unwrap();
     for (food, food_pos) in food_query.iter() {
         if player_pos == food_pos {
             to_grow.0 += 2;
             commands.entity(food).despawn();
-            score.send(crate::score::ScoreUpdate::AteFood);
+            score.write(crate::score::ScoreUpdate::AteFood);
         }
     }
 }
@@ -208,7 +202,7 @@ fn check_player_collision(
     player: Query<&Position, With<Player>>,
     segment_query: Query<&Position, With<TailSegment>>,
 ) {
-    let pos = player.single();
+    let pos = player.single().unwrap();
     if pos.x < 0
         || pos.x >= config.grid_size_x
         || pos.y < 0

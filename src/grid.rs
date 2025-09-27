@@ -12,18 +12,15 @@ impl Plugin for GridPlugin {
 }
 
 fn init(config: Res<Config>, mut commands: Commands) {
-    commands.spawn(GridBundle::from_config(&config));
+    commands.spawn(Grid::from_config(&config));
 }
 
 #[derive(Bundle)]
-struct GridBundle {
-    shape_bundle: ShapeBundle,
-    stroke: Stroke,
-}
+struct Grid(Shape);
 
-impl GridBundle {
-    fn from_config(config: &Config) -> GridBundle {
-        let mut grid_builder = GeometryBuilder::new();
+impl Grid {
+    fn from_config(config: &Config) -> Grid {
+        let mut grid_builder = ShapeBuilder::new();
         let xmax = (config.grid_size_x * config.pixels_per_cell) as f32;
         let ymax = (config.grid_size_y * config.pixels_per_cell) as f32;
         let half_cell = config.pixels_per_cell as f32 / 2.0;
@@ -53,12 +50,6 @@ impl GridBundle {
                 },
             ));
         }
-        GridBundle {
-            shape_bundle: ShapeBundle {
-                path: grid_builder.build(),
-                ..default()
-            },
-            stroke: Stroke::new(Color::WHITE, 1.0),
-        }
+        Grid(grid_builder.stroke((Color::WHITE, 1.0)).build())
     }
 }

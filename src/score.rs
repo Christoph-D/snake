@@ -49,7 +49,7 @@ fn update(
     mut query: Query<&mut Text, With<Score>>,
     mut event: EventReader<ScoreUpdate>,
 ) {
-    let mut text = query.single_mut();
+    let mut text = query.single_mut().unwrap();
     for _ in event.read() {
         score.0 += 1;
     }
