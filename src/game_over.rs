@@ -70,7 +70,8 @@ fn read_restart_input(
     keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    if !timer.0.tick(time.delta()).just_finished() {
+    timer.0.tick(time.delta());
+    if !timer.0.is_finished() {
         return;
     }
     if keys.get_just_pressed().next().is_some() {
