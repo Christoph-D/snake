@@ -1,8 +1,8 @@
 use crate::config::*;
 use bevy::asset::RenderAssetUsages;
 use bevy::color::palettes::css;
+use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
-use bevy::render::mesh::{Indices, PrimitiveTopology};
 use std::collections::VecDeque;
 
 pub struct PlayerPlugin;
@@ -233,7 +233,7 @@ fn check_player_food_collision(
     mut player: Query<(&Position, &mut SegmentsToGrow), With<Player>>,
     food_query: Query<(Entity, &Position), With<crate::food::Food>>,
     mut commands: Commands,
-    mut score: EventWriter<crate::score::ScoreUpdate>,
+    mut score: MessageWriter<crate::score::ScoreUpdate>,
 ) {
     let (player_pos, mut to_grow) = player.single_mut().unwrap();
     for (food, food_pos) in food_query.iter() {

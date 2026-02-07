@@ -61,7 +61,6 @@ fn main() {
             ..default()
         }))
         .init_state::<GameState>()
-        .enable_state_scoped_entities::<GameState>()
         .add_plugins((
             camera::CameraPlugin,
             game_over::GameOverScreenPlugin,

@@ -1,7 +1,7 @@
 use crate::config::{Config, GameState};
 use bevy::asset::RenderAssetUsages;
+use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
-use bevy::render::mesh::{Indices, PrimitiveTopology};
 
 pub struct GridPlugin;
 

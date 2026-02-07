@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 pub struct ScorePlugin;
 
-#[derive(Event)]
+#[derive(Message)]
 pub enum ScoreUpdate {
     AteFood,
 }
@@ -13,9 +13,9 @@ struct ScoreValue(i32);
 
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ScoreUpdate>()
+        app.add_message::<ScoreUpdate>()
             .add_systems(OnEnter(GameState::InGame), init)
-            .add_systems(Update, update.run_if(in_state(GameState::InGame)));
+            .add_systems(Update, update);
     }
 }
 
@@ -32,7 +32,7 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         TextColor(Color::WHITE),
-        TextLayout::new_with_justify(JustifyText::Left),
+        TextLayout::new_with_justify(Justify::Left),
         Node {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
@@ -47,7 +47,7 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn update(
     mut score: ResMut<ScoreValue>,
     mut query: Query<&mut Text, With<Score>>,
-    mut event: EventReader<ScoreUpdate>,
+    mut event: MessageReader<ScoreUpdate>,
 ) {
     let mut text = query.single_mut().unwrap();
     for _ in event.read() {

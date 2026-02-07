@@ -39,10 +39,7 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
                 ))
                 .with_children(|parent| {
                     parent
-                        .spawn((
-                            Text::new(""),
-                            TextLayout::new_with_justify(JustifyText::Center),
-                        ))
+                        .spawn((Text::new(""), TextLayout::new_with_justify(Justify::Center)))
                         .with_children(|parent| {
                             parent.spawn((
                                 TextSpan::new("Game over!"),
@@ -73,7 +70,7 @@ fn read_restart_input(
     keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    if !timer.0.tick(time.delta()).finished() {
+    if !timer.0.tick(time.delta()).just_finished() {
         return;
     }
     if keys.get_just_pressed().next().is_some() {
