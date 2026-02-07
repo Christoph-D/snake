@@ -1,0 +1,48 @@
+{
+    "name": "snake",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "Continue.continue",
+                "DavidAnson.vscode-markdownlint",
+                "eamodio.gitlens",
+                "esbenp.prettier-vscode",
+                "saoudrizwan.claude-dev",
+                "sst-dev.opencode",
+                "rust-lang.rust-analyzer",
+                "fill-labs.dependi"
+            ],
+            "settings": {
+                "[markdown]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode",
+                    "editor.unicodeHighlight.ambiguousCharacters": false,
+                    "editor.unicodeHighlight.invisibleCharacters": false,
+                    "diffEditor.ignoreTrimWhitespace": false,
+                    "editor.wordWrap": "on",
+                    "editor.quickSuggestions": {
+                        "comments": "off",
+                        "strings": "off",
+                        "other": "off"
+                    }
+                },
+                "prettier.proseWrap": "always",
+                "markdownlint.config": {
+                    "no-duplicate-heading": {
+                        "siblings_only": true
+                    }
+                },
+                "files.insertFinalNewline": true
+            }
+        }
+    },
+    "workspaceFolder": "/workspaces/snake",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/snake,type=bind,consistency=cached",
+    "remoteUser": "vscode",
+    "mounts": [
+        "source=config-snake,target=/home/vscode/persistent-config,type=volume"
+    ],
+    "postCreateCommand": "bash .devcontainer/setup.sh"
+}
