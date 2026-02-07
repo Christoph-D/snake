@@ -1,6 +1,6 @@
 # Snake
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Christoph-D/snake/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Christoph-D/snake/tree/main)
+[![CI](https://github.com/Christoph-D/snake/actions/workflows/ci.yml/badge.svg)](https://github.com/Christoph-D/snake/actions/workflows/ci.yml)
 
 A simple Snake clone.
 
