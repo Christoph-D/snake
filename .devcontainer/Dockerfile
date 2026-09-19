@@ -10,8 +10,4 @@ WORKDIR /home/vscode
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/home/vscode/persistent-config/.bash_history" \
   && echo "$SNIPPET" >> "/home/vscode/.bashrc"
 
-ENV OPENCODE_CONFIG=/home/vscode/persistent-config/opencode.json
-RUN curl -fsSL https://opencode.ai/install | bash
-ENV PATH="/home/vscode/.opencode/bin:$PATH"
-
 WORKDIR /workspaces/snake
