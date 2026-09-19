@@ -39,13 +39,15 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
                 ))
                 .with_children(|parent| {
                     parent
-                        .spawn((Text::new(""), TextLayout::new_with_justify(Justify::Center)))
+                        .spawn((Text::new(""), TextLayout::justify(Justify::Center)))
                         .with_children(|parent| {
                             parent.spawn((
                                 TextSpan::new("Game over!"),
                                 TextFont {
-                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                    font_size: 100.0,
+                                    font: FontSource::Handle(
+                                        asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    ),
+                                    font_size: FontSize::Px(100.0),
                                     ..default()
                                 },
                                 TextColor(css::RED.into()),
@@ -53,8 +55,10 @@ fn show_game_over_screen(mut commands: Commands, asset_server: Res<AssetServer>)
                             parent.spawn((
                                 TextSpan::new("\nPress any key to restart"),
                                 TextFont {
-                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                    font_size: 40.0,
+                                    font: FontSource::Handle(
+                                        asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    ),
+                                    font_size: FontSize::Px(40.0),
                                     ..default()
                                 },
                                 TextColor(css::RED.into()),

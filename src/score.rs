@@ -27,12 +27,12 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Text::new(""), // Updated later
         TextFont {
-            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            font_size: 30.0,
+            font: FontSource::Handle(asset_server.load("fonts/FiraSans-Bold.ttf")),
+            font_size: FontSize::Px(30.0),
             ..default()
         },
         TextColor(Color::WHITE),
-        TextLayout::new_with_justify(Justify::Left),
+        TextLayout::justify(Justify::Left),
         Node {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
