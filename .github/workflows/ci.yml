@@ -9,9 +9,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
+  CARGO_PROFILE_DEV_DEBUG: "0"
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -28,11 +29,25 @@ jobs:
       - name: Check formatting
         run: cargo fmt -- --check
 
+      # check-profile build: metadata only, no codegen for dependencies.
       - name: Run clippy
-        run: cargo clippy
+        run: cargo clippy --all-targets --locked
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.98.1
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
 
       - name: Run tests
-        run: cargo test
+        run: cargo test --locked
 
   build_wasm:
     runs-on: ubuntu-latest
@@ -49,4 +64,4 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build wasm target
-        run: cargo build --target wasm32-unknown-unknown
+        run: cargo build --locked --target wasm32-unknown-unknown
